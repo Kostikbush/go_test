@@ -1,47 +1,37 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"go-demo/mask"
+	"os"
+)
 
-var mes = "Here's my spammy page: https://youth-elixir.com dfjsjs"
+const defaultOut = "output.txt"
 
 func main() {
-	resultString := maskUrlInMessage(mes);
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Вы не ввели пути к файлам\n")
+		os.Exit(2)
+	}
 
-	fmt.Println(resultString)
-}
+	inputPath := os.Args[1]
+	outputPath := defaultOut
 
-func maskUrlInMessage (message string) string {
-	byteMessage := []byte(message)
-	var startIndex int;
+	fmt.Printf("Команды %s", os.Args)
 
-  for i := range byteMessage {
-    if  i+4 < len(byteMessage) && byteMessage[i] == 'h' &&
-			 byteMessage[i+1] == 't' &&
-			 byteMessage[i+2] == 't' &&
-			 byteMessage[i+3] == 'p' && 
-			 (byteMessage[i+4] == 's' || byteMessage[i+4] == ':'){
-				if(byteMessage[i+4] == 's'){
-					startIndex = i + 8
-				}else {
-					startIndex = i+7
-				}
+	if len(os.Args) >= 3 {
+		outputPath = os.Args[2]
+	}
 
-			continue
-		}
+	prod := mask.NewFileReader(inputPath)
+	pres := mask.NewFilePresenter(outputPath)
 
-		if(startIndex != 0 && byteMessage[i] != ' ' && startIndex <= i){
-			byteMessage[i] = '*' 
-			
-			continue
-		}
+	svc := mask.NewService(prod, pres)
+	
+	if err := svc.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
+	}
 
-		if(byteMessage[i] == ' ') {
-			startIndex = 0;
-
-			
-			continue
-		}
-  }
-
-	return string(byteMessage)
+	fmt.Printf("OK: processed '%s' -> '%s'\n", inputPath, outputPath)
 }
