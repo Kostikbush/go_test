@@ -68,5 +68,6 @@ func (s *Service) Run() error {
 	if err := s.pres.present(masked); err != nil {
 		return err
 	}
+
 	return nil
 }
