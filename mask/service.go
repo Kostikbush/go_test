@@ -22,8 +22,8 @@ func NewService(prod producer, pres presenter) *Service {
 }
 
 
-func (s *Service) MaskUrlInMessage(message string, maskedChan chan string) {
-	byteMessage := []byte(message)
+func (s *Service) MaskUrlInMessage(maskedChan chan string) {
+	byteMessage := []byte(<- maskedChan)
 	var startIndex int;
 
   for i := range byteMessage {
@@ -74,6 +74,10 @@ func (s *Service) Run() error {
 	maskedChan := make(chan string, len(lines))
 
 	for _, line := range lines {
+		maskedChan <- line
+	}
+
+	for _, line := range lines {
 		wg.Add(1)
     sem <- struct{}{}
 		
@@ -81,7 +85,7 @@ func (s *Service) Run() error {
 			defer wg.Done()
       defer func() { <-sem }()
 
-			s.MaskUrlInMessage(line, maskedChan)
+			s.MaskUrlInMessage(maskedChan)
 		}(line)		
 	}
 
