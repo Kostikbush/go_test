@@ -1,5 +1,9 @@
 package mask
 
+import (
+	"sync"
+)
+
 type producer interface {
 	produce() ([]string, error)
 }
@@ -18,7 +22,7 @@ func NewService(prod producer, pres presenter) *Service {
 }
 
 
-func (s *Service) MaskUrlInMessage(message string) string {
+func (s *Service) MaskUrlInMessage(message string, maskedChan chan string) {
 	byteMessage := []byte(message)
 	var startIndex int;
 
@@ -51,8 +55,14 @@ func (s *Service) MaskUrlInMessage(message string) string {
 		}
   }
 
-	return string(byteMessage)
+	maskedChan <- string(byteMessage)
 }
+
+var (
+    maxCountOfRutins = 10
+    sem     = make(chan struct{}, maxCountOfRutins)
+    wg      sync.WaitGroup
+)
 
 func (s *Service) Run() error {
 	lines, err := s.prod.produce()
@@ -61,8 +71,26 @@ func (s *Service) Run() error {
 	}
 
 	masked := make([]string, 0, len(lines))
+	maskedChan := make(chan string, len(lines))
+
 	for _, line := range lines {
-		masked = append(masked, s.MaskUrlInMessage(line))
+		wg.Add(1)
+    sem <- struct{}{}
+		
+		go func(lineArg string){
+			defer wg.Done()
+      defer func() { <-sem }()
+
+			s.MaskUrlInMessage(line, maskedChan)
+		}(line)		
+	}
+
+	wg.Wait()
+
+	close(maskedChan)
+
+	for msg  := range maskedChan {
+		masked = append(masked, msg)
 	}
 
 	if err := s.pres.present(masked); err != nil {

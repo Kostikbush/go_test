@@ -1,5 +1,15 @@
 See http://*********** now
-x https://***** y
-hello world
 go to http://******
+hello world
 a/b c
+See https://*********** now
+abcdifg
+x httpasad://a.b/c y
+hello world ://ascasc
+go to https://******
+a//:b c
+More https://*********** now
+Izi httpasad://a.b/c y
+hel://ascasc
+x https://***** y
+gorutins work on https://******

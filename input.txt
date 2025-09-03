@@ -3,3 +3,13 @@ x https://a.b/c y
 hello world
 go to http://ex.com
 a/b c
+See https://example.com now
+x httpasad://a.b/c y
+hello world ://ascasc
+go to https://ex.com
+a//:b c
+More https://example.com now
+Izi httpasad://a.b/c y
+hel://ascasc
+gorutins work on https://ex.com
+abcdifg
